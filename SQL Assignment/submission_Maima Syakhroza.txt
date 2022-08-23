@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<pset>
+
+    <!--
+        CS 564, FALL 2021
+        PROBLEM SET 1 SUBMISSION TEMPLATE
+
+        Please copy and paste your SQL queries into the appropriate spots below. 
+
+        When submitting SQL queries, please do not include the initial 
+        %sql or %%sql IPython commands. Just include the SQL code.
+
+        DO NOT DELETE THE <![CDATA[ ... ]]> LINES IN EACH <answer> TAG!
+        Doing so will break the autograder. To avoid accidentally breaking
+        something, please leave all existing comments in this template
+        intact in your submission.
+    -->
+
+    <student>
+        <name>
+            <!-- Insert your full name on the line below. -->
+            Maima Mahirah Syakhroza
+        </name>
+        <netid>
+            <!-- Insert your NetID (NOT your student ID number!) below. -->
+            msyakhroza
+        </netid>
+        <studentid>
+            <!-- Insert your student ID number below. -->
+            9082582249
+        </studentid>
+    </student>
+
+
+    <!-- BEGIN PROBLEM 1 -->
+    <answer number="1a">
+        <!-- Paste your solution to problem 1, part (a) below this line. --><![CDATA[
+        %sql SELECT i , j, val + (SELECT val FROM B WHERE B.i = A.i AND B.j = A.j) as "C" FROM A;
+
+
+        ]]><!-- End problem 1, part (a). -->
+    </answer>
+    <answer number="1b">
+        <!-- Paste your solution to problem 1, part (b) below this line. --><![CDATA[
+        %sql SELECT SUM(A.val * B.val) as "DotProduct" FROM A, B WHERE A.j = 2 AND B.j = 1 AND A.i = B.i;
+
+
+        ]]><!-- End problem 1, part (b). -->
+    </answer>
+    <answer number="1c">
+        <!-- Paste your solution to problem 1, part (c) below this line. --><![CDATA[
+        %sql SELECT A.i, B.j, SUM(A.val * B.val) AS "VAL" FROM A,B WHERE A.j = B.i GROUP BY A.i, B.j;
+
+
+        ]]><!-- End problem 1, part (c). -->
+    </answer>
+    <answer number="1d">
+        <!-- Paste your solution to problem 1, part (d) below this line. --><![CDATA[
+        %sql SELECT b.i, c.j, SUM (b.val * c.val) as "val" FROM (SELECT a1.i, a2.j, SUM(a1.val * a2.val) as "val" FROM A a1,A a2 WHERE a1.j = A2.i GROUP BY a1.i, a2.j)b, (SELECT a1.i, a2.j, SUM(a1.val * a2.val) as "val" FROM A a1,A a2 WHERE a1.j = A2.i GROUP BY a1.i, a2.j)c WHERE b.j = c.i GROUP BY b.i, c.j;
+
+
+        ]]><!-- End problem 1, part (d). -->
+    </answer>
+    <!-- END PROBLEM 1 -->
+
+
+    <!-- BEGIN PROBLEM 2 -->
+    <answer number="2a">
+        <!-- Paste your solution to problem 2, part (a) below this line. --><![CDATA[
+        %sql SELECT s.store, SUM(weeklysales) AS "AllSales" FROM Sales s, Holidays h WHERE s.WeekDate = h.weekdate and h.isholiday = "TRUE" GROUP BY store ORDER BY AllSales DESC LIMIT 1;
+
+        ]]><!-- End problem 2, part (a). -->
+    </answer>
+    <answer number="2b">
+        <!-- Paste your solution to problem 2, part (b) below this line. --><![CDATA[
+        %%sql 
+With HolidaysSalesFalse as (Select s.WeekDate, SUM(s.WeeklySales) as 'totalFalseSales' from Sales s inner join
+                            Holidays h on s.WeekDate = h.WeekDate and h.isHoliday = 'FALSE' group by s.WeekDate)
+,HolidaysSalesTrue as (Select s.WeekDate, SUM(s.WeeklySales) as 'totalTrueSales' from Sales s inner join
+                            Holidays h on s.WeekDate = h.WeekDate and h.isHoliday = 'TRUE' group by s.WeekDate)
+SELECT COUNT(*) as "NumNonHolidays" FROM (SELECT * 
+FROM HolidaysSalesFalse, HolidaysSalesTrue
+GROUP BY HolidaysSalesFalse.totalFalseSales
+HAVING HolidaysSalesFalse.totalFalseSales > AVG(HolidaysSalesTrue.totalTrueSales));
+
+
+
+        ]]><!-- End problem 2, part (b). -->
+    </answer>
+    <answer number="2c">
+        <!-- Paste your solution to problem 2, part (c) below this line. --><![CDATA[
+        %sql SELECT Type, SUM(weeklysales) as "TotalSales" FROM Sales sa, Stores st WHERE st.Store = sa.Store and (sa.weekdate LIKE '%-06-%' OR sa.weekdate LIKE '%-07-%' OR sa.weekdate LIKE '%-08-%')  group by Type;
+
+
+
+
+        ]]><!-- End problem 2, part (c). -->
+    </answer>
+    <!-- END PROBLEM 2 -->
+
+
+    <!-- BEGIN PROBLEM 3 -->
+    <answer number="3a">
+        <!-- Paste your solution to problem 3, part (a) below this line. --><![CDATA[
+        %%sql 
+SELECT B as company, d as distance 
+FROM streets WHERE A = "UW-Madison" and distance < 10
+UNION
+SELECT s2.B as company, s2.d + s1.d as distance
+FROM streets s1, streets s2 WHERE s1.B = s2.A and s1.A = "UW-Madison" and distance < 10;
+        ]]><!-- End problem 3, part (a). -->
+    </answer>
+    <answer number="3b">
+        <!-- Paste your solution to problem 3, part (b) below this line. --><![CDATA[
+        %%sql 
+DROP VIEW IF EXISTS hop;
+CREATE VIEW hop AS
+SELECT s1.A, s2.B, s1.d + s2.d AS dist
+FROM streets s1, streets s2
+WHERE s1.B = s2.A and s1.B = "UW-Madison" and dist <= 15 and s1.A <> s2.B
+UNION
+SELECT s1.A, s3.B, s1.d + s2.d + s3.d AS dist
+FROM streets s1, streets s2, streets s3
+WHERE s1.B = s2.A and s2.B = s3.A and (s2.A = "UW-Madison" or s2.B = "UW-Madison") and dist <= 15 and s1.A <> s3.B;
+
+SELECT A as company_1, B as company_2, dist as distance FROM hop WHERE A > B;
+
+        ]]><!-- End problem 3, part (b). -->
+    </answer>
+    <answer number="3c">
+        <!-- Paste your solution to problem 3, part (c) below this line. --><![CDATA[
+        %%sql 
+SELECT A, B, C, distance FROM
+(SELECT s1.A, s1.B, s2.B as "C", s1.d + s2.d + s3.d as "distance", s1.id + s2.id + s3.id as total_id
+FROM streets s1, streets s2, streets s3 
+WHERE s1.B = s2.A and s3.A = s2.B and s3.B = s1.A
+GROUP BY s1.id)
+GROUP BY total_id
+HAVING COUNT(*) > 1;
+
+        ]]><!-- End problem 3, part (c). -->
+    </answer>
+    <!-- END PROBLEM 3 -->
+
+
+</pset>
